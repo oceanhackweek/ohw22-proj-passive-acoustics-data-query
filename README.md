@@ -28,7 +28,7 @@ USER: wants to know where available passive acoustic data from:
 3. depth
 	- water channel
 	- source
-4. has / doesn't have data (#4)
+4. has / doesn't have data
 	- strict / not strict (boolean)
 
 
@@ -37,9 +37,9 @@ For future:
 
 ## Datasets
 Starting datasets will be: 
-	- Ocean Observatories Initative (OOI)
-	- National Centers for Environmental Information (NCEI)
-	- Ocean Networks Canada (OCN)
+- Ocean Observatories Initative (OOI)
+- National Centers for Environmental Information (NCEI)
+- Ocean Networks Canada (OCN)
 
 
 ## Workflow
@@ -48,8 +48,8 @@ Starting datasets will be:
 
 ## References
 
-https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
-https://service.iris.edu/
-https://wiki.oceannetworks.ca/display/O2A/properties+Discovery+Service
+- https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
+- https://service.iris.edu/
+- https://wiki.oceannetworks.ca/display/O2A/properties+Discovery+Service
 
 
