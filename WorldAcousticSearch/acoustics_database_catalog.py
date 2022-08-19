@@ -52,19 +52,3 @@ database_subsections = {
 
 standardized_column_output = ["filename", "min_time", "max_time", "min_lat", "max_lat", "min_long", "max_long", "min_freq", "max_freq", "min_depth", "max_depth", "data_url"]
 
-
-
-
-def database_output_generator(dbs: list, query_params):
-    """Iterates through the catalog of databases and yields output (dataframe?) for each.
-    
-    :param dbs: list of databases to qury.
-    :param query_params: (dict) query parameters to feed to database queries
-    
-    :yields: pandas dataframe?
-    """
-    
-    for db in dbs:
-        if db in catalog:
-            yield db, catalog[db](**query_params)
-

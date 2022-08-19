@@ -11,7 +11,9 @@ import pandas as pd
 
 from dtime_handling import strToDatetime
 import lat_long_checks
-from acoustics_database_catalog import database_output_generator
+from utilities import compute_min_max, none_or_float
+
+from acoustics_database_catalog import catalog, database_subsections, freshwater, marine, terrestrial
 import acoustics_database_catalog
 
 
@@ -90,7 +92,6 @@ class WorldAcousticsFinder(object):
             self._compute_min_max_lat(latitude, radius)
         else:
             coords = lat_long_checks.min_max_coords([min_lat, max_lat], "lat")
-            print(coords)
             self.min_lat, self.max_lat = lat_long_checks.min_max_coords([min_lat, max_lat], "lat")
         if longitude:
             self._compute_min_max_long(longitude, radius)
@@ -105,8 +106,9 @@ class WorldAcousticsFinder(object):
         self.min_depth = none_or_float(min_depth)
         self.max_depth = none_or_float(max_depth)
         
+        # Subselect regions
         self.region = region.lower()
-        if self.region not in acoustics_database_catalog.database_subsections:
+        if self.region not in database_subsections:
             self.region = "all"
             warnings.warn(f'{region} is not an available sensor placement, search results defaulted to "all"')
         
@@ -138,60 +140,52 @@ class WorldAcousticsFinder(object):
         return query_params
     
     def _fetchData(self, dbs=[]):
+        """
+        Iterate through the requested databases (specified by dbs) to find available acoustic data.
+        :param dbs: (list) databases to include from the database catalog.
+        """
+        
         self.available_data = pd.DataFrame([], columns=acoustics_database_catalog.standardized_column_output)  # reset available data from last query
-        generator = database_output_generator(dbs, self.query_params)
+        generator = self._databaseGenerator(dbs)
         for db, data in generator:
             data["database"] = db
             self.available_data = pd.concat([self.available_data, data])
     
+    def _databaseGenerator(self, dbs: list):
+        """
+        Iterates through the catalog of databases and yields output (dataframe?) for each.
+    
+        :param dbs: list of databases to query.
+
+        :yields: pandas dataframe?
+        """
+
+        for db in dbs:
+            if db in catalog:
+                yield db, catalog[db](**self.query_params)
+    
     def findAcousticSensors(self):
-        self._fetchData(acoustics_database_catalog.database_subsections[self.region])
+        self._fetchData(dbs=database_subsections[self.region])
         return self.available_data.reset_index(drop=True)
     
-    def findOceanHydrophones(self):
-        self._fetchData(acoustics_database_catalog.marine)
+    def findFreshwaterAcoustics(self):
+        self._fetchData(dbs=freshwater)
         return self.available_data.reset_index(drop=True)
     
-    def findTerrestrialHydrophones(self):
-        self._fetchData(acoustics_database_catalog.terrestrial)
+    def findMarineAcoustics(self):
+        self._fetchData(dbs=marine)
         return self.available_data.reset_index(drop=True)
     
-    def findFreshWaterHydrophones(self):
-        self._fetchData(acoustics_database_catalog.freshwater)
+    def findTerrestrialAcoustics(self):
+        self._fetchData(dbs=terrestrial)
         return self.available_data.reset_index(drop=True)
-
-
-def compute_min_max(point: float, radius: float):
-    """
-    Computes the minimum and maximum of range given a central point and a radius from that point.
-    
-    :param point: (float) center point for the range.
-    :param radius: (float) distance from point. Should be at same scale as point.
-    
-    :return: (float) minimum and maximum of range.
-    """
-    
-    return (point - radius, point + radius)
-
-
-def none_or_float(val):
-    """Simple check that val exists and converts it to float.
-    
-    :param val: (None or float convertable object) value to check and convert.
-    """
-    
-    if val:
-        return float(val)
-    else:
-        return val
-    
 
 
 if __name__ == "__main__":
     test = WorldAcousticsFinder(min_time="2020-05-06 12:00:00", latitude=10.6, region="terrestrial")
     print(test.query_params)
     test2 = WorldAcousticsFinder(min_time="2020-05-06 12:00:00", min_lat=10.6, max_lat=12.8)
-    print(test2.findOceanHydrophones())
+    print(test2.findMarineAcoustics())
     print(test2.query_params)
     test3 = WorldAcousticsFinder(region="test")
     print(test3.query_params)
