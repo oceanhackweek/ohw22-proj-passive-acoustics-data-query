@@ -51,5 +51,5 @@ Starting datasets will be:
 - https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
 - https://service.iris.edu/
 - https://wiki.oceannetworks.ca/display/O2A/properties+Discovery+Service
-
+- [NCEI Passive Acoustic Data map viewer API](refs/ncei.md)
 
