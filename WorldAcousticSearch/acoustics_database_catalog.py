@@ -53,28 +53,3 @@ database_subsections = {
 
 
 standardized_column_output = ["filename", "min_time", "max_time", "min_lat", "max_lat", "min_long", "max_long", "min_freq", "max_freq", "min_depth", "max_depth", "data_url"]
-
-
-
-
-def database_output_generator(dbs: list, query_params):
-    """Iterates through the catalog of databases and yields output (dataframe?) for each.
-    
-    :param dbs: list of databases to qury.
-    :param query_params: (dict) query parameters to feed to database queries
-    
-    :yields: pandas dataframe?
-    """
-
-    with ThreadPoolExecutor() as executor:
-        future_to_db = {}
-        for db in dbs:
-            if db in catalog:
-                future_to_db[executor.submit(catalog[db], **query_params)] = db
-
-        for future in as_completed(future_to_db):
-            db = future_to_db[future]
-            try:
-                yield db, future.result()
-            except Exception as exc:
-                print(f"{db!r} generated an exception: {exc}")
