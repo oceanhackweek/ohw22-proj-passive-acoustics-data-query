@@ -11,6 +11,8 @@
 # many parameters may have no input.
 
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import pandas as pd
 
 
@@ -63,8 +65,16 @@ def database_output_generator(dbs: list, query_params):
     
     :yields: pandas dataframe?
     """
-    
-    for db in dbs:
-        if db in catalog:
-            yield db, catalog[db](**query_params)
 
+    with ThreadPoolExecutor() as executor:
+        future_to_db = {}
+        for db in dbs:
+            if db in catalog:
+                future_to_db[executor.submit(catalog[db], **query_params)] = db
+
+        for future in as_completed(future_to_db):
+            db = future_to_db[future]
+            try:
+                yield db, future.result()
+            except Exception as exc:
+                print(f"{db!r} generated an exception: {exc}")
